@@ -45,48 +45,70 @@ for(i in 1:length(distinctCommunities)){
     
     monoRuns <- bind_rows(modelRuns[c(monoRunIDs$itemPosition)]) %>% 
       pivot_wider(names_from = runID, values_from = speciesIDs[j]) %>% 
-      rename(biomassControl = 2, biomassTreatment = 3) %>% 
+      rename(biomassMonoControl = 2, biomassMonoTreatment = 3) %>% 
       mutate(species = speciesIDs[j],
-             biomassRatio = biomassTreatment/biomassControl)
+             biomassMonoRatio = biomassMonoTreatment/biomassMonoControl)
     
     monocultures <- monocultures %>% 
       bind_rows(., monoRuns)
   }
   
   # now we need to iterate through the model runs where the different species were simulated in mixed communities of varying richness
-  mixedRunsMeta <- modelMeta %>% 
-    filter(str_detect(runID, paste(distinctCommunities[i],'_',sep=''))) %>% 
-    filter(nSpecies > 1)
+  # to make calculations more efficient, we calculate NBES separately for each richness level
   
-  # iterate through different species combinations
-  speciesCombos <- unique(mixedRunsMeta$speciesCombo)
-  for (m in 1:length(speciesCombos)){
+  # get richness level:
+  richnessLevels <- 2:max(modelMeta$maxSpecies)
+  
+  for(r in 1:length(richnessLevels)){
     
-    # identify model runs that correspond to current species combination
-    speciesID <- unlist(speciesCombos[m])
-    identical_elements <- which(sapply(mixedRunsMeta$speciesCombo, function(x) identical(x, speciesID)))
-    currentRunMeta <- mixedRunsMeta %>% 
-      slice(identical_elements)
+    # get metadata for model runs that correspond to current richness level
+    mixedRunsMeta <- modelMeta %>% 
+      filter(str_detect(runID, paste(distinctCommunities[i],'_',sep=''))) %>% 
+      filter(nSpecies == richnessLevels[r])
     
-    # now identify the corresponding elements in the list of model runs
-    mixedRunIDs <- listElementsInd %>% 
-      filter(runID %in% currentRunMeta$runID)
-    
-    # extract treatment and control runs for current species combination
-    # create tidy tibble with control and treatment biomass for each species in mixed community
-    mixedRun <- bind_rows(modelRuns[c(mixedRunIDs$itemPosition)]) %>% 
-      pivot_longer(names_to = 'species', values_to = 'biomass', -c(time, runID)) %>% 
-      pivot_wider(names_from = runID, values_from = biomass) %>% 
-      rename(biomassControl = 3, biomassTreatment = 4) %>% 
-      arrange(species, time)
-    
-    # create a second, tidy tibble, with total biomass in control and treatment in mixed community
+    # iterate through different species combinations within that richness level
+    speciesCombos <- unique(mixedRunsMeta$speciesCombo)
+    for (m in 1:length(speciesCombos)){
+      
+      # identify model runs that correspond to current species combination
+      speciesID <- unlist(speciesCombos[m])
+      identical_elements <- which(sapply(mixedRunsMeta$speciesCombo, function(x) identical(x, speciesID)))
+      currentRunMeta <- mixedRunsMeta %>% 
+        slice(identical_elements)
+      
+      # now identify the corresponding elements in the list of model runs
+      mixedRunIDs <- listElementsInd %>% 
+        filter(runID %in% currentRunMeta$runID)
+      
+      # extract treatment and control runs for current species combination
+      # create tidy tibble with control and treatment biomass for each species in mixed community
+      mixedRun <- bind_rows(modelRuns[c(mixedRunIDs$itemPosition)]) %>% 
+        pivot_longer(names_to = 'species', values_to = 'biomass', -c(time, runID)) %>% 
+        pivot_wider(names_from = runID, values_from = biomass) %>% 
+        rename(biomassMixControl = 3, biomassMixTreatment = 4) %>% 
+        arrange(species, time)
+      
+      # create a second, tidy tibble, with total biomass in control and treatment in mixed community
       totalBiomassMixed <- mixedRun %>% 
         group_by(time) %>% 
-        summarize(totalBiomControl = sum(biomassControl, na.rm = T),
-                  totalBiomTreatment = sum(biomassTreatment, na.rm = T))
+        summarize(totalBiomMixControl = sum(biomassMixControl, na.rm = T),
+                  totalBiomMixTreatment = sum(biomassMixTreatment, na.rm = T))
       
+      # create object containing all variable required to calculate NBES
+      masterDat <- mixedRun %>% 
+        left_join(., monocultures, by = join_by(time, species)) %>% 
+        left_join(., totalBiomassMixed, by = join_by(time)) %>% 
+        mutate(combination = paste('S',speciesID,collapse = '', sep = ''),
+               relBiomassT0Mixed = unique(mixedRunsMeta$N0)/(unique(mixedRunsMeta$N0) * unique(mixedRunsMeta$nSpecies))) %>% 
+        select(time, combination, species, biomassMixTreatment, biomassMixControl,
+               biomassMonoTreatment,biomassMonoControl, biomassMonoRatio, totalBiomMixTreatment, totalBiomMixControl,relBiomassT0Mixed)
+      
+    
+      
+      }
+    
   }
+  
   
 }
 
