@@ -4,7 +4,7 @@
 # ------------------------------------------------------------------------------------------ #
 # load relevant packages
 library(tidyverse)
-
+library(MESS)
 # read model run for which NBES should be calculated
 modelResults <- readRDS('/Users/dobahl001/github/NBES/output/press_R5.RData')
 modelRuns <- modelResults[[2]]
@@ -101,9 +101,20 @@ for(i in 1:length(distinctCommunities)){
         mutate(combination = paste('S',speciesID,collapse = '', sep = ''),
                relBiomassT0Mixed = unique(mixedRunsMeta$N0)/(unique(mixedRunsMeta$N0) * unique(mixedRunsMeta$nSpecies))) %>% 
         select(time, combination, species, biomassMixTreatment, biomassMixControl,
-               biomassMonoTreatment,biomassMonoControl, biomassMonoRatio, totalBiomMixTreatment, totalBiomMixControl,relBiomassT0Mixed)
+               biomassMonoTreatment,biomassMonoControl, biomassMonoRatio, totalBiomMixTreatment, totalBiomMixControl,relBiomassT0Mixed) %>%
+        mutate(RRobs = (totalBiomMixControl-totalBiomMixTreatment)/(totalBiomMixControl+totalBiomMixTreatment),
+               expSppBiom = totalBiomMixControl*biomassMonoRatio*relBiomassT0Mixed,
+               RRexp = ((expSppBiom-relBiomassT0Mixed*totalBiomMixControl)/(expSppBiom+relBiomassT0Mixed*totalBiomMixControl)))
       
+    AUC.data <- masterDat %>%
+      group_by(combination) %>%
+      summarise(AUC.RR_obs= auc(time, RRobs,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+                                type = c("linear"),absolutearea = FALSE),
+                AUC.RR_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+                                type = c("linear"),absolutearea = FALSE),
+                NBES = AUC.RR_obs-AUC.RR_exp)
     
+
       
       }
     
