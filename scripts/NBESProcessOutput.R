@@ -23,6 +23,7 @@ for(k in 1:length(modelRuns)){
 modelMeta <- modelResults[[1]]
 distinctCommunities <- unique(modelMeta$communityID)
 
+nbesDatAll <- NULL
 # iterate through communities and calculate NBES
 for(i in 1:length(distinctCommunities)){
   
@@ -58,7 +59,6 @@ for(i in 1:length(distinctCommunities)){
   
   # get richness level:
   richnessLevels <- 2:max(modelMeta$maxSpecies)
-  
   for(r in 1:length(richnessLevels)){
     
     # get metadata for model runs that correspond to current richness level
@@ -106,28 +106,42 @@ for(i in 1:length(distinctCommunities)){
                expSppBiom = totalBiomMixControl*biomassMonoRatio*relBiomassT0Mixed,
                RRexp = ((expSppBiom-relBiomassT0Mixed*totalBiomMixControl)/(expSppBiom+relBiomassT0Mixed*totalBiomMixControl)))
       
-    AUC.data <- masterDat %>%
-      group_by(combination) %>%
-      summarise(AUC.RR_obs= auc(time, RRobs,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
-                                type = c("linear"),absolutearea = FALSE),
-                AUC.RR_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
-                                type = c("linear"),absolutearea = FALSE),
-                NBES = AUC.RR_obs-AUC.RR_exp)
-    
-
       
+      # extract competition matrix to summarise competition metrics about community
+      compMatrixMixedRun <- do.call(rbind, currentRunMeta$compMatrix[1])[speciesID,speciesID]
+      
+      # calculate nbes, add data about competitiveness of community
+      nbesDat <- masterDat %>%
+        group_by(combination) %>%
+        summarise(AUC.RR_obs= auc(time, RRobs,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+                                  type = c("linear"),absolutearea = FALSE),
+                  AUC.RR_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+                                  type = c("linear"),absolutearea = FALSE),
+                  NBES = AUC.RR_obs-AUC.RR_exp) %>% 
+        mutate(speciesCombo = list(speciesID),
+               meanAlphas = mean(c(compMatrixMixedRun[upper.tri(compMatrixMixedRun)], compMatrixMixedRun[lower.tri(compMatrixMixedRun)])),
+               sdAlphas = sd(c(compMatrixMixedRun[upper.tri(compMatrixMixedRun)], compMatrixMixedRun[lower.tri(compMatrixMixedRun)]))) %>% 
+        left_join(., filter(mixedRunsMeta, str_detect(runID, 'treatment')), by = 'speciesCombo') %>% 
+        select(-compMatrix)
+      
+      nbesDatAll <- nbesDatAll %>% 
+        bind_rows(., nbesDat)
       }
     
   }
-  
-  
+  print(paste('community', i, 'out of', length(distinctCommunities),'processed', sep = ' '))
 }
 
+# save summary file
+write_rds(nbesDatAll, 'output/nbesSummary.RData')
 
 
-
-
-
+# nbesDatAll <- read_rds('output/nbesSummary.RData')
+# library(ggbeeswarm)
+# nbesDatAll %>% 
+#   ggplot(.,aes(x = nSpecies, y = NBES)) +
+#   geom_quasirandom()
+# 
 
 
 
