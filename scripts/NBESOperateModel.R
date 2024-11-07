@@ -22,7 +22,7 @@ tempControl <- 17.5 # temperature for control run
 maxSpecies <- 5 # maximum species richness (5, 10)
 compType <- 'normalDistribution' # (leftSkewedIndividualised, normalDistribution, noCompetition)
 compNormMean <- 0 # mean value of normal distribution from which alphas will be drawn
-repetitions <- 10 # number of repetitions for each combination of compNormMean and compNormSd to account for stochasticity
+repetitions <- 20 # number of repetitions for each combination of compNormMean and compNormSd to account for stochasticity
 N0 = 0.1 # biomass of each species at t0
 
 # parameters shaping the thermal performance curves (do not touch...(?))
@@ -39,12 +39,12 @@ dt <- 0.05 # time step
 # --------------------------------------------------------------------------------------------------- #
 # the following parameters are provided as ranges, as the script will iterate through them to test different scenarios
 # competition intensity:
-compNormSd <- seq(0.1,0.5, length.out = 10) # sd of normal distribution from which alphas will be drawn 
+compNormSd <- seq(0,0.5, length.out = 3) # sd of normal distribution from which alphas will be drawn 
 
 # response diversity
-tOptTib <- tibble(tOptScenario = paste('tOpt', 1:3, sep = ''),
-                  tOptLower = c(15, 16, 17), # tibble with pairs of upper/lower temperatures over which community t_opts are distributed
-                  tOptUpper = c(19, 18, 17))
+tOptTib <- tibble(tOptScenario = paste('tOpt', 1:4, sep = ''),
+                  tOptLower = c(15, 17, 16,15), # tibble with pairs of upper/lower temperatures over which community t_opts are distributed
+                  tOptUpper = c(15,18, 19,20))
 # --------------------------------------------------------------------------------------------------- #
 # Run model
 simulatioResults <- runScenariosParallel(destPath = destPath,

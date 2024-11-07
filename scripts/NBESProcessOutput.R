@@ -6,7 +6,7 @@
 library(tidyverse)
 library(MESS)
 # read model run for which NBES should be calculated
-modelResults <- readRDS('/Users/dobahl001/github/NBES/output/press_R5.RData')
+modelResults <- readRDS('output/press_R5.RData')
 modelRuns <- modelResults[[2]]
 
 # loop through model runs and extract runID
@@ -98,13 +98,18 @@ for(i in 1:length(distinctCommunities)){
       masterDat <- mixedRun %>% 
         left_join(., monocultures, by = join_by(time, species)) %>% 
         left_join(., totalBiomassMixed, by = join_by(time)) %>% 
+        ungroup()%>%
         mutate(combination = paste('S',speciesID,collapse = '', sep = ''),
                relBiomassT0Mixed = unique(mixedRunsMeta$N0)/(unique(mixedRunsMeta$N0) * unique(mixedRunsMeta$nSpecies))) %>% 
         select(time, combination, species, biomassMixTreatment, biomassMixControl,
                biomassMonoTreatment,biomassMonoControl, biomassMonoRatio, totalBiomMixTreatment, totalBiomMixControl,relBiomassT0Mixed) %>%
-        mutate(RRobs = (totalBiomMixControl-totalBiomMixTreatment)/(totalBiomMixControl+totalBiomMixTreatment),
-               expSppBiom = totalBiomMixControl*biomassMonoRatio*relBiomassT0Mixed,
-               RRexp = ((expSppBiom-relBiomassT0Mixed*totalBiomMixControl)/(expSppBiom+relBiomassT0Mixed*totalBiomMixControl)))
+        mutate(expSppBiom = totalBiomMixControl*biomassMonoRatio*relBiomassT0Mixed,
+               RRexp = ((expSppBiom-relBiomassT0Mixed*totalBiomMixControl)/
+                        (expSppBiom+relBiomassT0Mixed*totalBiomMixControl))) %>%
+        group_by(time, combination) %>%
+        mutate(RRobs = (totalBiomMixTreatment-totalBiomMixControl)/(totalBiomMixTreatment+totalBiomMixControl),
+               SumExpSppBiom = sum(expSppBiom, na.rm = T),
+               RR_ges_exp = (SumExpSppBiom-totalBiomMixControl)/(SumExpSppBiom+totalBiomMixControl))
       
       
       # extract competition matrix to summarise competition metrics about community
@@ -115,8 +120,10 @@ for(i in 1:length(distinctCommunities)){
         group_by(combination) %>%
         summarise(AUC.RR_obs= auc(time, RRobs,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
                                   type = c("linear"),absolutearea = FALSE),
-                  AUC.RR_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+                  AUC.RR_spp_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
                                   type = c("linear"),absolutearea = FALSE),
+                  AUC.RR_exp=auc(time, RR_ges_exp,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+                                 type = c("linear"),absolutearea = FALSE),
                   NBES = AUC.RR_obs-AUC.RR_exp) %>% 
         mutate(speciesCombo = list(speciesID),
                meanAlphas = mean(c(compMatrixMixedRun[upper.tri(compMatrixMixedRun)], compMatrixMixedRun[lower.tri(compMatrixMixedRun)])),
@@ -138,10 +145,10 @@ write_rds(nbesDatAll, 'output/nbesSummary.RData')
 
 # nbesDatAll <- read_rds('output/nbesSummary.RData')
 # library(ggbeeswarm)
-# nbesDatAll %>% 
-#   ggplot(.,aes(x = nSpecies, y = NBES)) +
-#   geom_quasirandom()
-# 
+ nbesDatAll %>% 
+   ggplot(.,aes(x = nSpecies, y = NBES)) +
+  geom_hline(yintercept = 0)+
+   geom_quasirandom()
 
 
 
