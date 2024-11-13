@@ -1,0 +1,298 @@
+---
+title: "NBES calculation in simulated data"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here we analyse the model runs created to explore the underlying mechanisms in the NBES paper.
+
+## Model description
+We simulated a five-species community using a continuous Lotka-Volterra model with temperature-dependent vital rates (Vasseur, 2020). In the model, the change of biomass for each species is described as 
+
+dN_i/dt = N_i*r(T)* (1-(∑α_ij*N_j)/K(T)) 
+
+where N_i is the species-specific biomass, The r is the intrinsic rate of natural increase, which is given by the difference between the birth rate (b_(0,i) )  and deathrate (d_(0,i)). K is the carrying capacity, α_(i,j) the competition strength between species i and species j, and N_j the biomass of species j.
+
+The carrying capacity K of species i is given as 
+K_i=r_mi/(β+δ)  (Vasseur, 2020; Eq 14.6)
+where β and δ are the density dependent constants.
+
+Temperature dependence was incorporated into the birth and death rate:
+b_(0,i) (T)=abe^(-(T-b_(opt,i) )^2/s_i )
+d_(0,i) (T)=ade^ziT (Vasseur, 2020; Eq 14.5)
+
+where, a_ is an intercept, b_(opt,i)  is the temperature at which intrinsic growth rate is highest, s is the width of intrinsic growth rate, z is the slope of death rate and scales the effect of temperature (in °C) to mimic the Arrhenius relationship. Combining the birth rate temperature function and death rate temperature function gives the left-skewed shape common for temperature performance curves (Vasseur, 2020).
+
+
+We created communities 5 species, that differ in their strength of interspecific competition and temperature optimum. The interspecific competition terms are drawn from a one-sided normal distribution α>0, so that all interactions were competitive with asymmetric interactions between any two species in the model. A higher value for α indicates a stronger effect by species i on species j, whereas a low value of α indicates a small effect of species i on species j. We varied interspecific competition terms by introducing differing standard deviations of competition values α_ij.
+
+We simulated each of the species within the communities as monocultures and in combinations of 2-5 species. Each of the species assemblages was then exposed to a temperature increase (disturbance) and a control (undisturbed).  
+
+## Settings
+n = 5 species;  
+repetitions = 20, 20 independent simulations for each scenario;  
+time points = 150;  
+
+Temp Min: 15 (minimum temperature in disturbance);  
+Temp Max:20 (maximum temperature in disturbance);  
+Temp Control: 17.5 (temperature for control run). 
+
+We manipulated response diversity (RD) and species competition strength (alpha). Specifically, we tested three levels of competitiveness in our communities, that were drawn from a left-sided distribution, so that all interactions are competitive:   
+sd = 0 - no interaction;   
+sd = 0.25 intermediate interaction strength;   
+sd = 0.5 high interaction strength;   
+
+For response diversity, we manipulated the distribution of temperature optima within the community, by distributing them evenly along a chosen temperature gradient. For example, for high response diversity, Temperature optima ranged between 15-20 and thus were 15, 16, 17, 18, 19, 20 for species 1-5. Specificially, we tested:   
+no RD: Topt of 15 and thus a negative effect;    
+low RD: Topt ranging between 17-18 degree;  
+intermed RD: Topt ranging between 16-19 degree;  
+high RD: Topt ranging between 15-20 degree;  
+
+We ran 20 independent simulations for each of the settings.  For analysis, we include only the first 100 time points before the system shows non-equlibrium/ chaotic dynamics
+
+## Simulation results
+
+### disturbance Type: Press Disturbance   
+
+```{r echo=FALSE, warning=FALSE, include = FALSE}
+library(here)
+library(tidyverse)
+library(ggbeeswarm)
+
+nbes_data100 <- readRDS('~/Desktop/phD/Exp22/NBES-main/NBES/output/nbesSummary_100.RData')
+nbes_data100_flux <- readRDS('~/Desktop/phD/Exp22/NBES-main/NBES/output/nbesSummary_fluct100.RData')
+nbes_data100_combined <- readRDS('~/Desktop/phD/Exp22/NBES-main/NBES/output/nbesSummary_combined100.RData')
+```
+
+```{r echo=FALSE, warning=FALSE}
+#add diversity level description
+nbes_plot <- nbes_data100 %>%
+  mutate(RD = tOptUpper)
+
+nbes_plot$RD[nbes_plot$RD==15] <- 'No RD (Topt = 15)'
+nbes_plot$RD[nbes_plot$RD==18] <- 'Low RD (17<Topt<18)'
+nbes_plot$RD[nbes_plot$RD==19] <- 'Intermed RD (16<Topt<19)'
+nbes_plot$RD[nbes_plot$RD==20] <- 'High RD (15<Topt<20)'
+
+### create plots ###
+
+# NBES - Richness #
+nbes_plot %>%
+  filter(RD !='Low RD (17<Topt<18)')%>%
+  group_by(nSpecies, RD, compNormSd)%>%
+  mutate(mean.NBES = mean(NBES),
+         sd.NBES = sd(NBES))%>%
+  ggplot(., aes(x= nSpecies, y = NBES))+
+    geom_hline(yintercept = 0)+
+    geom_quasirandom(size = 0.7, alpha = 0.3)+
+    geom_errorbar(aes(ymin = mean.NBES-sd.NBES, ymax = mean.NBES+sd.NBES), width = .1, color = 'black')+
+  ggtitle('NBES in Press Disturbance Treatment')+
+  geom_smooth()+
+    geom_point(aes(y = mean.NBES), color = 'darkred')+
+   scale_x_continuous(limits = c(1.5,5.5),breaks = seq(2,5,1))+
+    facet_grid(RD~compNormSd, scales = 'free')+
+    theme_bw()+
+    theme(legend.position = 'none')
+
+```
+
+We can observe that the NBES depends on both, species competition and response diversity. 
+
+- The stronger the competition between species, the larger is the total effect on NBES.  
+- for high response diversity, we observe a positive trend in NBES with increasing richness. 
+- when there is no RD, the NBES becomes negative.  
+
+
+```{r echo=FALSE}
+# Competitive communities - NBES #
+nbes_plot %>%
+  filter(compNormSd ==0.5)%>%
+  ggplot(., aes(x= meanAlphas, y = NBES))+
+  geom_hline(yintercept = 0)+
+  labs(x = 'Mean realised Community Alpha')+
+  facet_grid(RD~nSpecies)+
+  geom_point(size = 0.7, alpha = 0.4)+
+  geom_smooth(method = 'lm')+
+  theme_bw()+
+  ggtitle('Press Disturbance - Highly competitive communities')+
+  theme(legend.position = 'none')
+
+```
+
+For communities with strong competition (sd = 0.5), we observe that the NBES becomes more positive with increasing interspecific interactions. This trend is even more pronounced, if the community has high response diversity.   
+For communities with no response diversity, the NBES becomes negative with increasing interaction strength. This makes a lot of sense, since with more species, we dont add any dissimilar responses to the community but only more competition partners.   
+
+```{r echo=FALSE}
+# No competition - NBES #
+nbes_plot %>%
+  filter(compNormSd == 0)%>%
+  ggplot(., aes(x= nSpecies, y = NBES))+
+  facet_grid(~RD)+
+  ggtitle('Press Disturbance - Communities without interaction')+
+  geom_hline(yintercept = 0)+
+  geom_quasirandom(size = 0.7, alpha = 0.3)+
+  theme_bw()
+```
+For communities without interaction (sd = 0), we observe that the NBES is zero if also the RD is low/ zero. Thus, our metric works. 
+
+
+
+### disturbance Type: Fluctuations 
+Next we look at diurnal fluctuations, where one fluctuation is = 1 timepoint. Minimum and Maximum temperatures are as set above. 
+
+```{r echo=FALSE, warning=FALSE}
+nbes_plot_flux <- nbes_data100_flux %>%
+  mutate(RD = tOptUpper)
+
+nbes_plot_flux$RD[nbes_plot_flux$RD==15] <- 'No RD (Topt = 15)'
+nbes_plot_flux$RD[nbes_plot_flux$RD==18] <- 'Low RD (17<Topt<18)'
+nbes_plot_flux$RD[nbes_plot_flux$RD==19] <- 'Intermed RD (16<Topt<19)'
+nbes_plot_flux$RD[nbes_plot_flux$RD==20] <- 'High RD (15<Topt<20)'
+
+
+### create plots ###
+
+# NBES - Richness #
+nbes_plot_flux %>%
+      filter(RD !='Low RD (17<Topt<18)')%>%
+group_by(nSpecies, RD, compNormSd)%>%
+  mutate(mean.NBES = mean(NBES),
+         sd.NBES = sd(NBES))%>%
+  ggplot(., aes(x= nSpecies, y = NBES))+
+geom_hline(yintercept = 0)+
+  geom_quasirandom(size = 0.7, alpha = 0.3)+
+  geom_errorbar(aes(ymin = mean.NBES-sd.NBES, ymax = mean.NBES+sd.NBES), width = .1, color = 'black')+
+  geom_point(aes(y = mean.NBES), color = 'darkred')+
+    geom_smooth()+
+scale_x_continuous(limits = c(1.5,5.5),breaks = seq(2,5,1))+
+  facet_grid(RD~compNormSd, scales = 'free_y')+
+  ggtitle('NBES in Fluctuation Treatment')+
+  theme_bw()+
+  theme(legend.position = 'none')
+
+```
+
+The NBES is decreasing with increasing species richness for high RD, but increases when there is no RD. This is reverse than what we would have expected.
+Domes explanation for this is the following: In a high RD scenario, there are always two species which have their TOpt at the minimum and maximum obtainable temperatures. The time window in our simulations for these spp to grow is small. Increasing diversity comes with a higher propability of including these 'poor-performing' spp in the community. If such spp are also poor competitors, their realised growth is even worse than expected from monoculture, leading to a negative NBES with increasing diversity and competition. 
+
+```{r echo=FALSE}
+# Competitive communities - NBES #
+nbes_plot_flux %>%
+      filter(RD !='Low RD (17<Topt<18)')%>%
+filter(compNormSd ==0.5)%>%
+  ggplot(., aes(x= meanAlphas, y = NBES))+
+  geom_hline(yintercept = 0)+
+  labs(x = 'Mean realised Community Alpha')+
+  facet_grid(RD~nSpecies)+
+  geom_point(size = 0.7, alpha = 0.4)+
+  geom_smooth(method = 'lm')+
+  theme_bw()+
+  ggtitle('Fluctuations - Highly competitive communities')+
+  theme(legend.position = 'none')
+```
+For highly competitive communities, we find that RD has a negative effect on NBES.
+
+```{r echo=FALSE}
+nbes_plot_flux %>%
+      filter(RD !='Low RD (17<Topt<18)')%>%
+filter(compNormSd == 0)%>%
+  ggplot(., aes(x= nSpecies, y = NBES))+
+  facet_grid(~RD)+
+  ggtitle('Fluctuations - No competition')+
+  geom_hline(yintercept = 0)+
+  geom_quasirandom(size = 0.7, alpha = 0.3)+
+  theme_bw()
+
+```
+
+When no interaction between species occur, the NBES is negative for high RD and zero for low response diversity. 
+
+
+### disturbance Type: Combined Disturbances (Fluctuations and Press)
+Now we take a look at the combined effects of temperature fluctuations around an increasing mean. 
+Minimum and Maximum temperatures are as set above. Fluctuations are +- 2.5 degree around the increasing mean.
+
+```{r echo=FALSE, warning=FALSE}
+nbes_plot_combined <- nbes_data100_combined %>%
+  mutate(RD = tOptUpper)
+### create plots ###
+nbes_plot_combined$RD[nbes_plot_combined$RD==15] <- 'No RD (Topt = 15)'
+nbes_plot_combined$RD[nbes_plot_combined$RD==18] <- 'Low RD (17<Topt<18)'
+nbes_plot_combined$RD[nbes_plot_combined$RD==19] <- 'Intermed RD (16<Topt<19)'
+nbes_plot_combined$RD[nbes_plot_combined$RD==20] <- 'High RD (15<Topt<20)'
+
+# NBES - Richness #
+nbes_plot_combined %>%
+    filter(RD !='Low RD (17<Topt<18)')%>%
+group_by(nSpecies, RD, compNormSd)%>%
+  mutate(mean.NBES = mean(NBES),
+         sd.NBES = sd(NBES))%>%
+  ggplot(., aes(x= nSpecies, y = NBES))+
+  geom_hline(yintercept = 0)+
+  geom_quasirandom(size = 0.7, alpha = 0.3)+
+  geom_errorbar(aes(ymin = mean.NBES-sd.NBES, ymax = mean.NBES+sd.NBES), width = .1, color = 'black')+
+  geom_point(aes(y = mean.NBES), color = 'darkred')+
+  geom_smooth()+
+scale_x_continuous(limits = c(1.5,5.5),breaks = seq(2,5,1))+
+  facet_grid(RD~compNormSd, scales = 'free_y')+
+  ggtitle('NBES in Combined Treatment')+
+  theme_bw()+
+  theme(legend.position = 'none')
+
+```
+
+```{r echo=FALSE}
+# Competitive communities - NBES #
+nbes_plot_combined %>%
+      filter(RD !='Low RD (17<Topt<18)')%>%
+filter(compNormSd ==0.5)%>%
+  ggplot(., aes(x= meanAlphas, y = NBES))+
+  geom_hline(yintercept = 0)+
+  labs(x = 'Mean realised Community Alpha')+
+  facet_grid(RD~nSpecies)+
+  geom_point(size = 0.7, alpha = 0.4)+
+  geom_smooth(method = 'lm')+
+  theme_bw()+
+  ggtitle('Fluctuations and Press- Highly competitive communities')+
+  theme(legend.position = 'none')
+
+nbes_plot_combined %>%
+      filter(RD !='Low RD (17<Topt<18)')%>%
+filter(compNormSd == 0)%>%
+  ggplot(., aes(x= nSpecies, y = NBES))+
+  facet_grid(~RD)+
+  ggtitle('Fluctuations and Press - No competition')+
+  geom_hline(yintercept = 0)+
+  geom_quasirandom(size = 0.7, alpha = 0.3)+
+  theme_bw()
+```
+
+The combination of fluctuations and temperature increase (press) shows that the outcome of the NBES is highly dependend not only on the response diversity of species (variation in their Temperature Performance Curves), but also the strength of interspecific interactions. If no interactions occur, the NBES shows higher heterogeneity and greater effect sizes for high response diversity. 
+
+
+### Example Run - Combined disturbances
+Here I plot an exemplary model run for the combined treatment. The control is indicated by dashed lines. 
+For the analysis, we only consider time points until 100, to exclude the chaotic dynamics (which will unnaturally enhance the AUC values). 
+
+```{r echo=FALSE, warning=FALSE}
+masterDat<-readRDS('~/Desktop/phD/Exp22/NBES-main/NBES/output/masterDat_combined.RData')
+masterDat %>% 
+   ggplot(.,aes(x = time, y = totalBiomMixControl)) +
+   geom_line(color ='darkred')+
+  geom_vline(xintercept = 100, color = 'darkgrey', size = 3)+
+   geom_line(aes(y = totalBiomMixTreatment), color = 'black', linetype = 'dashed')+
+   labs(y = 'Total Biomass')
+
+ masterDat %>% 
+   ggplot(.,aes(x = time, y = biomassMonoTreatment, color = species)) +
+   geom_line()+
+   geom_line(aes(y = biomassMonoControl), linetype = 'dashed')+
+  geom_vline(xintercept = 100, color = 'darkgrey', size = 3)+
+labs(y = 'Total Biomass')
+
+```

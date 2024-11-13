@@ -5,8 +5,10 @@
 # load relevant packages
 library(tidyverse)
 library(MESS)
+library(ggbeeswarm)
+
 # read model run for which NBES should be calculated
-modelResults <- readRDS('output/press_R5.RData')
+modelResults <- readRDS('output/combined_R5.RData')
 modelRuns <- modelResults[[2]]
 
 # loop through model runs and extract runID
@@ -118,11 +120,11 @@ for(i in 1:length(distinctCommunities)){
       # calculate nbes, add data about competitiveness of community
       nbesDat <- masterDat %>%
         group_by(combination) %>%
-        summarise(AUC.RR_obs= auc(time, RRobs,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+        summarise(AUC.RR_obs= auc(time, RRobs,  from = min(time, na.rm = TRUE), to = max(100, na.rm = TRUE),
                                   type = c("linear"),absolutearea = FALSE),
-                  AUC.RR_spp_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+                  AUC.RR_spp_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(100, na.rm = TRUE),
                                   type = c("linear"),absolutearea = FALSE),
-                  AUC.RR_exp=auc(time, RR_ges_exp,  from = min(time, na.rm = TRUE), to = max(time, na.rm = TRUE),
+                  AUC.RR_exp=auc(time, RR_ges_exp,  from = min(time, na.rm = TRUE), to = max(100, na.rm = TRUE),
                                  type = c("linear"),absolutearea = FALSE),
                   NBES = AUC.RR_obs-AUC.RR_exp) %>% 
         mutate(speciesCombo = list(speciesID),
@@ -140,20 +142,32 @@ for(i in 1:length(distinctCommunities)){
 }
 
 # save summary file
-write_rds(nbesDatAll, 'output/nbesSummary.RData')
+write_rds(nbesDatAll, 'output/nbesSummary_combined100.RData')
 
-
-# nbesDatAll <- read_rds('output/nbesSummary.RData')
-# library(ggbeeswarm)
- nbesDatAll %>% 
-   ggplot(.,aes(x = nSpecies, y = NBES)) +
+nbesDatAll %>% 
+  ggplot(.,aes(x = nSpecies, y = NBES)) +
   geom_hline(yintercept = 0)+
-   geom_quasirandom()
+  geom_quasirandom()
 
 
+### one exemplary run ###
 
+write_rds(masterDat, 'output/masterDat_combined.RData')
 
+ masterDat %>% 
+   ggplot(.,aes(x = time, y = totalBiomMixControl)) +
+   geom_line(color ='black')+
+   geom_line(aes(y = totalBiomMixTreatment), color = 'darkred')+
+   labs(y = 'Total Biomass')
+ ggsave(plot = last_plot(), file = here('output/TotalBiomass_combinedDist.png'))
 
+ masterDat %>% 
+   ggplot(.,aes(x = time, y = biomassMonoTreatment, color = species)) +
+   geom_line()+
+   geom_line(aes(y = biomassMonoControl), linetype = 'dashed')+
+   labs(y = 'Total Biomass')
+ ggsave(plot = last_plot(), file = here('output/sppBiomass_combinedDist.png'))
+ 
 
 
 

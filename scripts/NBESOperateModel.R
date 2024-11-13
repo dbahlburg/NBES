@@ -9,14 +9,14 @@ destPath <- 'output/' # folder where simulation results will be stored
 # --------------------------------------------------------------------------------------------------- #
 # The following simulation settings are fixed during the model run:
 # Disturbance choices:
-distType <- 'press' # Disturbance type (fluctuation, press, combined)
+distType <- 'combined' # Disturbance type (fluctuation, press, combined)
 pTempMin <- 15 # 1.1 pTempMin (minimum temperature in press disturbance)
 pTempMax <- 20 # 1.2 pTempMax (maximum temperature in press disturbance)
 tempControl <- 17.5 # temperature for control run
 # when distType is "fluctuation" or "combined"
-# fTempMin <- value (in "combined scenario", fTempMin determines the lower deviation from the press-disturbance temperature)
-# fTempMax <- value (in "combined scenario", fTempMax determines the upper deviation from the press-disturbance temperature)
-# fTempPeriod <- 1 (determines period of fluctuation, set to 1 day)
+ fTempMin <- 2.5 #(in "combined scenario", fTempMin determines the lower deviation from the press-disturbance temperature)
+ fTempMax <- 2.5 #(in "combined scenario", fTempMax determines the upper deviation from the press-disturbance temperature)
+ fTempPeriod <- 1 #(determines period of fluctuation, set to 1 day)
 
 # community choices:
 maxSpecies <- 5 # maximum species richness (5, 10)
@@ -56,9 +56,9 @@ simulatioResults <- runScenariosParallel(destPath = destPath,
              pTempMin = pTempMin,
              pTempMax = pTempMax,
              tempControl = tempControl,
-             # fTempMin = fTempMin,
-             # fTempMax = fTempMax,
-             # fTempPeriod = fTempPeriod,
+              fTempMin = fTempMin,
+              fTempMax = fTempMax,
+              fTempPeriod = fTempPeriod,
              N0 = N0,
              beta = beta,
              delta = delta,
