@@ -42,9 +42,9 @@ dt <- 0.05 # time step
 compNormSd <- seq(0,0.5, length.out = 3) # sd of normal distribution from which alphas will be drawn 
 
 # response diversity
-tOptTib <- tibble(tOptScenario = paste('tOpt', 1:4, sep = ''),
-                  tOptLower = c(15, 17, 16,15), # tibble with pairs of upper/lower temperatures over which community t_opts are distributed
-                  tOptUpper = c(15,18, 19,20))
+tOptTib <- tibble(tOptScenario = paste('tOpt', 1:3, sep = ''),
+                  tOptLower = c(17.5, 16,15), # tibble with pairs of upper/lower temperatures over which community t_opts are distributed
+                  tOptUpper = c(17.5, 19,20))
 # --------------------------------------------------------------------------------------------------- #
 # Run model
 simulatioResults <- runScenariosParallel(destPath = destPath,
