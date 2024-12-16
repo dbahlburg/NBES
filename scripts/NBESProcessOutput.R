@@ -9,7 +9,7 @@ library(ggbeeswarm)
 library(here)
 
 # read model run for which NBES should be calculated
-modelResults <- readRDS('output/combined_R5.RData')
+modelResults <- readRDS('output/fluctuation_R5.RData')
 modelRuns <- modelResults[[2]]
 
 # loop through model runs and extract runID
@@ -27,6 +27,7 @@ modelMeta <- modelResults[[1]]
 distinctCommunities <- unique(modelMeta$communityID)
 
 nbesDatAll <- NULL
+communityMeta <- NULL
 # iterate through communities and calculate NBES
 for(i in 1:length(distinctCommunities)){
   
@@ -117,7 +118,7 @@ for(i in 1:length(distinctCommunities)){
       
       # extract competition matrix to summarise competition metrics about community
       compMatrixMixedRun <- do.call(rbind, currentRunMeta$compMatrix[1])[speciesID,speciesID]
-      
+
       # calculate nbes, add data about competitiveness of community
       nbesDat <- masterDat %>%
         group_by(combination) %>%
@@ -136,6 +137,21 @@ for(i in 1:length(distinctCommunities)){
       
       nbesDatAll <- nbesDatAll %>% 
         bind_rows(., nbesDat)
+      
+      # store species-specific alpha values of current model run/community
+      for (f in 1:length(speciesID)){
+        alphaValues <- nbesDat %>% 
+          select(runID, communityID, combination, tOptValues) %>% 
+          mutate(species = paste('spp', speciesID[f], sep = ''),
+                 meanAlpha = mean(compMatrixMixedRun[,f][-f]),
+                 tOptValue = unlist(tOptValues)[f]
+                 ) %>% 
+          select(-tOptValues)
+        communityMeta <- communityMeta %>% 
+          bind_rows(., alphaValues)
+      }
+      
+      
       }
     
   }
@@ -143,7 +159,8 @@ for(i in 1:length(distinctCommunities)){
 }
 
 # save summary file
-write_rds(nbesDatAll, 'output/nbesSummary_combined100.RData')
+write_rds(nbesDatAll, 'output/nbesSummary_fluctuation100.RData')
+write_rds(communityMeta, 'output/nbesCommunityMeta_fluctuation100.RData')
 
 nbesDatAll %>% 
   ggplot(.,aes(x = nSpecies, y = NBES)) +
@@ -153,14 +170,14 @@ nbesDatAll %>%
 
 ### one exemplary run ###
 
-write_rds(masterDat, 'output/masterDat_combined.RData')
+write_rds(masterDat, 'output/masterDat_press.RData')
 
  masterDat %>% 
    ggplot(.,aes(x = time, y = totalBiomMixControl)) +
    geom_line(color ='black')+
    geom_line(aes(y = totalBiomMixTreatment), color = 'darkred')+
    labs(y = 'Total Biomass')
- ggsave(plot = last_plot(), file = here('output/TotalBiomass_combinedDist.png'))
+ ggsave(plot = last_plot(), file = here('output/TotalBiomass_pressDist.png'))
 
  masterDat %>% 
    ggplot(.,aes(x = time, y = biomassMonoTreatment, color = species)) +

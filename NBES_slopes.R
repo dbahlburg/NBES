@@ -7,6 +7,7 @@ library(ggbeeswarm)
 nbes_data100 <- readRDS("output/nbesSummary_press100.RData")
 nbes_data100_flux <- readRDS("output/nbesSummary_fluctuation100.RData")
 nbes_data100_combined <- readRDS("output/nbesSummary_combined100.RData")
+communityMeta_press<-readRDS('output/nbesCommunityMeta_press100.RData')
 
 #add diversity level description
 nbes_plot_press <- nbes_data100 %>%
@@ -174,8 +175,78 @@ negSlope_press <- RD_press1%>%
                 richness_3 = '3',
                 richness_4 = '4',
                 richness_5 = '5')%>%
-  filter(richness_5>richness_2)
+  filter(richness_5>richness_2) %>%
+  pivot_longer(cols = c(richness_2, richness_3, richness_4, richness_5), names_to = 'richness_level', values_to  = 'mean.nbes')%>%
+  separate(richness_level, into = c('removeme', 'nSpecies'))%>%
+  mutate(nSpecies = as.numeric(nSpecies)) %>%
+  left_join(., RD_press1)%>%
+  select(nSpecies, combination, distType, communityID, NBES, mean.nbes,RD, resil.lm)%>%
+  left_join(., communityMeta_press)
 
+ggplot(negSlope_press, aes( x = nSpecies, y = NBES, color = RD))+
+  geom_hline(yintercept = 0)+
+  geom_smooth(se = F)+
+  geom_point(size = 3)+
+  facet_grid(~communityID)+
+  theme_bw()+
+  theme(legend.position = 'bottom')
+ggsave(plot = last_plot(), file = here('output/V-shape.png'), width = 8, height = 4.5)
+
+
+S1_negSlope_press <- negSlope_press %>%
+  filter(str_detect(combination, 'S1')) %>%
+  group_by(communityID, nSpecies) %>%
+  reframe(S_nbes = mean(NBES),
+          species = paste('spp1'))
+
+S2_negSlope_press <- negSlope_press %>%
+  filter(str_detect(combination, 'S2')) %>%
+  group_by(communityID, nSpecies) %>%
+  reframe(S_nbes = mean(NBES),
+          species = paste('spp2'))
+
+S3_negSlope_press <- negSlope_press %>%
+  filter(str_detect(combination, 'S3')) %>%
+  group_by(communityID, nSpecies) %>%
+  reframe(S_nbes = mean(NBES),
+          species = paste('spp3'))
+
+S4_negSlope_press <- negSlope_press %>%
+  filter(str_detect(combination, 'S4')) %>%
+  group_by(communityID, nSpecies) %>%
+  reframe(S_nbes = mean(NBES),
+          species = paste('spp4'))
+
+S5_negSlope_press <- negSlope_press %>%
+  filter(str_detect(combination, 'S5')) %>%
+  group_by(communityID, nSpecies) %>%
+  reframe(S_nbes = mean(NBES),
+          species = paste('spp5'))
+
+allS<- S5_negSlope_press %>%
+  bind_rows(., S4_negSlope_press) %>%
+  bind_rows(., S3_negSlope_press) %>%
+  bind_rows(., S2_negSlope_press) %>%
+  bind_rows(., S1_negSlope_press) 
+
+GrandMean <- negSlope_press %>%
+  group_by(nSpecies, communityID,RD)%>%
+  reframe(gMean = mean(NBES)) %>%
+  right_join(., allS) %>%
+  mutate(devFromGrandMean = S_nbes-gMean) %>%
+  left_join(., negSlope_press)
+
+ggplot(GrandMean, aes( y = tOptValue, x = devFromGrandMean, color = nSpecies))  +
+  geom_vline(xintercept = 0)+
+  geom_point(size = 2)+
+  labs(x = 'Influence on NBES', y='Topt', color = 'Treatment')+
+  facet_wrap(~RD, scales = 'free_y')+
+  theme_bw()+
+  theme(legend.position = 'bottom')
+ggsave(plot=last_plot(), file = here('output/topt_NBESeffect-temp.png'), width = 8, height = 5)
+
+  
+#### other distType ####
 negSlope_combined <- RD_combined1%>%  
   filter(resil.lm <0) %>%
   select(communityID, distType, tOptUpper, compNormSd, RD, resil.lm, combination, NBES, nSpecies)%>%
