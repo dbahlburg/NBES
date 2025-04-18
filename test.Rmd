@@ -64,9 +64,9 @@ library(here)
 library(tidyverse)
 library(ggbeeswarm)
 
-nbes_data100 <- readRDS('~/Desktop/phD/Exp22/NBES-main/NBES/output/nbesSummary_100.RData')
-nbes_data100_flux <- readRDS('~/Desktop/phD/Exp22/NBES-main/NBES/output/nbesSummary_fluct100.RData')
-nbes_data100_combined <- readRDS('~/Desktop/phD/Exp22/NBES-main/NBES/output/nbesSummary_combined100.RData')
+nbes_data100 <- readRDS("output/nbesSummary_press100.RData")
+nbes_data100_flux <- readRDS("output/nbesSummary_fluctuation100.RData")
+nbes_data100_combined <- readRDS("output/nbesSummary_combined100.RData")
 ```
 
 ```{r echo=FALSE, warning=FALSE}
@@ -74,7 +74,7 @@ nbes_data100_combined <- readRDS('~/Desktop/phD/Exp22/NBES-main/NBES/output/nbes
 nbes_plot <- nbes_data100 %>%
   mutate(RD = tOptUpper)
 
-nbes_plot$RD[nbes_plot$RD==15] <- 'No RD (Topt = 15)'
+nbes_plot$RD[nbes_plot$RD==17.5] <- 'No RD (Topt = 17.5)'
 nbes_plot$RD[nbes_plot$RD==18] <- 'Low RD (17<Topt<18)'
 nbes_plot$RD[nbes_plot$RD==19] <- 'Intermed RD (16<Topt<19)'
 nbes_plot$RD[nbes_plot$RD==20] <- 'High RD (15<Topt<20)'
@@ -149,7 +149,7 @@ Next we look at diurnal fluctuations, where one fluctuation is = 1 timepoint. Mi
 nbes_plot_flux <- nbes_data100_flux %>%
   mutate(RD = tOptUpper)
 
-nbes_plot_flux$RD[nbes_plot_flux$RD==15] <- 'No RD (Topt = 15)'
+nbes_plot_flux$RD[nbes_plot_flux$RD==17.5] <- 'No RD (Topt = 17.5)'
 nbes_plot_flux$RD[nbes_plot_flux$RD==18] <- 'Low RD (17<Topt<18)'
 nbes_plot_flux$RD[nbes_plot_flux$RD==19] <- 'Intermed RD (16<Topt<19)'
 nbes_plot_flux$RD[nbes_plot_flux$RD==20] <- 'High RD (15<Topt<20)'
@@ -221,7 +221,7 @@ Minimum and Maximum temperatures are as set above. Fluctuations are +- 2.5 degre
 nbes_plot_combined <- nbes_data100_combined %>%
   mutate(RD = tOptUpper)
 ### create plots ###
-nbes_plot_combined$RD[nbes_plot_combined$RD==15] <- 'No RD (Topt = 15)'
+nbes_plot_combined$RD[nbes_plot_combined$RD==17.5] <- 'No RD (Topt = 17.5)'
 nbes_plot_combined$RD[nbes_plot_combined$RD==18] <- 'Low RD (17<Topt<18)'
 nbes_plot_combined$RD[nbes_plot_combined$RD==19] <- 'Intermed RD (16<Topt<19)'
 nbes_plot_combined$RD[nbes_plot_combined$RD==20] <- 'High RD (15<Topt<20)'

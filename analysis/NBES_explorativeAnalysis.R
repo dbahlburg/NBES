@@ -10,6 +10,7 @@ nbes_data100 <- readRDS("output/nbesSummary_press100.RData")
 nbes_data100_flux <- readRDS("output/nbesSummary_fluctuation100.RData")
 nbes_data100_combined <- readRDS("output/nbesSummary_combined100.RData")
 
+
 #### Press ####
 
 #add diversity level description
@@ -36,7 +37,7 @@ nbes_plot %>%
     facet_grid(RD~compNormSd)+
     theme_bw()+
     theme(legend.position = 'none')
-ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/press_NBES_richness.png'))
+#ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/press_NBES_richness.png'))
 
 # Competitive communities - NBES #
 nbes_plot %>%
@@ -49,7 +50,7 @@ nbes_plot %>%
   geom_smooth(method = 'lm')+
   theme_bw()+
   theme(legend.position = 'none')
-ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/press_NBES_MeanAlpha.png'))
+#ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/press_NBES_MeanAlpha.png'))
 
 # No competition - NBES #
 nbes_plot %>%
@@ -59,7 +60,7 @@ nbes_plot %>%
   geom_hline(yintercept = 0)+
   geom_quasirandom(size = 0.7, alpha = 0.3)+
   theme_bw()
-ggsave(plot = last_plot(), width = 8, height = 4, file = here('output/press_NBES_Richness_sd0.png'))
+#ggsave(plot = last_plot(), width = 8, height = 4, file = here('output/press_NBES_Richness_sd0.png'))
 
 
 #### Fluctuation ####
@@ -89,7 +90,7 @@ nbes_plot_flux %>%
   facet_grid(RD~compNormSd)+
   theme_bw()+
   theme(legend.position = 'none')
-ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/NBES_fluct_richness.png'))
+#ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/NBES_fluct_richness.png'))
 
 # Competitive communities - NBES #
 nbes_plot_flux %>%
@@ -102,7 +103,7 @@ nbes_plot_flux %>%
   geom_smooth(method = 'lm')+
   theme_bw()+
   theme(legend.position = 'none')
-ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/NBES_fluct-MeanAlpha.png'))
+#ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/NBES_fluct-MeanAlpha.png'))
 
 # No competition - NBES #
 nbes_plot_flux %>%
@@ -112,7 +113,7 @@ nbes_plot_flux %>%
   geom_hline(yintercept = 0)+
   geom_quasirandom(size = 0.7, alpha = 0.3)+
   theme_bw()
-ggsave(plot = last_plot(), width = 8, height = 4, file = here('output/NBES_fluct_Richness_sd0.png'))
+#ggsave(plot = last_plot(), width = 8, height = 4, file = here('output/NBES_fluct_Richness_sd0.png'))
 
 #### Combined ####
 
@@ -142,7 +143,7 @@ nbes_plot_combined %>%
   facet_grid(RD~compNormSd)+
   theme_bw()+
   theme(legend.position = 'none')
-ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/NBES_combined_richness.png'))
+#ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/NBES_combined_richness.png'))
 
 # Competitive communities - NBES #
 nbes_plot_combined %>%
@@ -155,4 +156,4 @@ nbes_plot_combined %>%
   geom_smooth(method = 'lm')+
   theme_bw()+
   theme(legend.position = 'none')
-ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/NBES_combined-MeanAlpha.png'))
+#ggsave(plot = last_plot(), width = 8, height = 8, file = here('output/NBES_combined-MeanAlpha.png'))
