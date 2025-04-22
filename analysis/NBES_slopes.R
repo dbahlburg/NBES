@@ -316,7 +316,7 @@ press_plot2 <- RD_press1%>%
 press_plot2
 
 cowplot::plot_grid(press_plot1, press_plot2, labels = c('(a)', '(b)', '(c)'), ncol = 1)
-ggsave(plot = last_plot(), file = here('output/Figure2_MeanNBES_press.png'), width = 7, height = 5)
+ggsave(plot = last_plot(), file = here('output/Figure2_MeanNBES_press.tiff'), width = 7, height = 5)
 
 #### Grand Mean ####
 names(RD_press1)

@@ -122,11 +122,11 @@ for(i in 1:length(distinctCommunities)){
       # calculate nbes, add data about competitiveness of community
       nbesDat <- masterDat %>%
         group_by(combination) %>%
-        summarise(AUC.RR_obs= auc(time, RRobs,  from = min(time, na.rm = TRUE), to = max(100, na.rm = TRUE),
+        summarise(AUC.RR_obs= auc(time, RRobs,  from = min(time, na.rm = TRUE), to = max(150, na.rm = TRUE),
                                   type = c("linear"),absolutearea = FALSE),
-                  AUC.RR_spp_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(100, na.rm = TRUE),
+                  AUC.RR_spp_exp= auc(time, RRexp,  from = min(time, na.rm = TRUE), to = max(150, na.rm = TRUE),
                                   type = c("linear"),absolutearea = FALSE),
-                  AUC.RR_exp=auc(time, RR_ges_exp,  from = min(time, na.rm = TRUE), to = max(100, na.rm = TRUE),
+                  AUC.RR_exp=auc(time, RR_ges_exp,  from = min(time, na.rm = TRUE), to = max(150, na.rm = TRUE),
                                  type = c("linear"),absolutearea = FALSE),
                   NBES = AUC.RR_obs-AUC.RR_exp) %>% 
         mutate(speciesCombo = list(speciesID),
@@ -159,8 +159,8 @@ for(i in 1:length(distinctCommunities)){
 }
 
 # save summary file
-write_rds(nbesDatAll, 'output/nbesSummary_fluctuation100.RData')
-write_rds(communityMeta, 'output/nbesCommunityMeta_fluctuation100.RData')
+write_rds(nbesDatAll, 'output/nbesSummary_fluctuation150.RData')
+write_rds(communityMeta, 'output/nbesCommunityMeta_fluctuation150.RData')
 
 nbesDatAll %>% 
   ggplot(.,aes(x = nSpecies, y = NBES)) +
