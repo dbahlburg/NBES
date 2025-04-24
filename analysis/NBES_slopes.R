@@ -316,7 +316,7 @@ press_plot2 <- RD_press1%>%
 press_plot2
 
 cowplot::plot_grid(press_plot1, press_plot2, labels = c('(a)', '(b)', '(c)'), ncol = 1)
-ggsave(plot = last_plot(), file = here('output/Figure2_MeanNBES_press.tiff'), width = 7, height = 5)
+ggsave(plot = last_plot(), file = here('output/Figure2_MeanNBES_press.pdf'), width = 7, height = 5)
 
 #### Grand Mean ####
 names(RD_press1)
@@ -637,10 +637,4 @@ negSlope_fluct <- RD_flux1%>%
                 richness_4 = '4',
                 richness_5 = '5')%>%
   filter(richness_5>richness_2)
-
-unique(combined_negSlope$communityID)
-press_negSlope <- RD_press1%>%  filter(resil.lm <0)
-unique(press_negSlope$communityID)
-fluct_negSlope <- RD_flux1%>%  filter(resil.lm <0)
-unique(fluct_negSlope$communityID)
 
