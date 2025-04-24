@@ -9,7 +9,7 @@ library(ggbeeswarm)
 library(here)
 
 # read model run for which NBES should be calculated
-modelResults <- readRDS('output/fluctuation_R5.RData')
+modelResults <- readRDS('output/press_R5.RData')
 modelRuns <- modelResults[[2]]
 
 # loop through model runs and extract runID
@@ -159,8 +159,8 @@ for(i in 1:length(distinctCommunities)){
 }
 
 # save summary file
-write_rds(nbesDatAll, 'output/nbesSummary_fluctuation150.RData')
-write_rds(communityMeta, 'output/nbesCommunityMeta_fluctuation150.RData')
+write_rds(nbesDatAll, 'output/nbesSummary_press150.RData')
+write_rds(communityMeta, 'output/nbesCommunityMeta_press150.RData')
 
 nbesDatAll %>% 
   ggplot(.,aes(x = nSpecies, y = NBES)) +
@@ -169,7 +169,6 @@ nbesDatAll %>%
 
 
 ### one exemplary run ###
-
 write_rds(masterDat, 'output/masterDat_press.RData')
 
  masterDat %>% 
@@ -190,6 +189,8 @@ write_rds(masterDat, 'output/masterDat_press.RData')
 
 
 
+ 
+ 
 
 
 
