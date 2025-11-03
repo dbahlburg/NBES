@@ -4,12 +4,12 @@ library(tidyverse)
 library(ggbeeswarm)
 
 #### Load data ####
-nbes_data100 <- readRDS("output/nbesSummary_press100.RData")
-nbes_data100_flux <- readRDS("output/nbesSummary_fluctuation100.RData")
-nbes_data100_combined <- readRDS("output/nbesSummary_combined100.RData")
-communityMeta_press<-readRDS('output/nbesCommunityMeta_press100.RData')
-communityMeta_combined<-readRDS('output/nbesCommunityMeta_combined100.RData')
-communityMeta_fluctuation<-readRDS('output/nbesCommunityMeta_fluctuation100.RData')
+nbes_data100 <- readRDS("output/nbesSummary_press150_varBV.RData")
+nbes_data100_flux <- readRDS("output/nbesSummary_fluctuation150_varBV.RData")
+nbes_data100_combined <- readRDS("output/nbesSummary_combination150_varBV.RData")
+communityMeta_press<-readRDS('output/nbesCommunityMeta_press150_varBV.RData')
+communityMeta_combined<-readRDS('output/nbesCommunityMeta_combination150_varBV.RData')
+communityMeta_fluctuation<-readRDS('output/nbesCommunityMeta_fluctution150_varBV.RData')
 
 #### press ####
 #add diversity level description
@@ -48,8 +48,9 @@ ggplot(slope_press, aes(x = compNormSd, y = resil.lm))+
   facet_grid(~RD)
 
 RD_press1 <- slope_press%>%
-  right_join(., nbes_plot_press)%>%
-  mutate(alpha_info = paste('alpha','==', compNormSd))
+  right_join(., nbes_plot_press)%>% 
+  mutate(alpha = paste(ifelse(compNormSd == 0, "no\n competition", ifelse(compNormSd == 0.25, "intermediate\n competition", "strong\n competition"))))
+
 
 RD_press1%>%
   filter(resil.lm <0) %>%
@@ -100,8 +101,9 @@ ggplot(slope_fluct, aes(x = compNormSd, y = resil.lm))+
   facet_grid(~RD)
 
 RD_flux1 <- slope_fluct%>%
-  right_join(., nbes_plot_flux)%>%
-  mutate(alpha_info = paste('alpha','==', compNormSd))
+  right_join(., nbes_plot_flux)%>% 
+  mutate(alpha = paste(ifelse(compNormSd == 0, "no\n competition", ifelse(compNormSd == 0.25, "intermediate\n competition", "strong\n competition"))))
+
  
 RD_flux1%>%
   filter(resil.lm <0) %>%
@@ -153,11 +155,11 @@ ggplot(slope_combined, aes(x = compNormSd, y = resil.lm))+
   facet_grid(~RD)
 
 RD_combined1 <- slope_combined%>%
-  right_join(., nbes_plot_combined)%>%
-  mutate(alpha_info = paste('alpha','==', compNormSd))
+  right_join(., nbes_plot_combined) %>% 
+  mutate(alpha = paste(ifelse(compNormSd == 0, "no\n competition", ifelse(compNormSd == 0.25, "intermediate\n competition", "strong\n competition"))))
 
 RD_combined1%>%
-  filter(resil.lm <0) %>%
+  #filter(resil.lm <0) %>%
   group_by(nSpecies, RD, compNormSd, communityID) %>%
   reframe(mean = mean(NBES))%>%
   ggplot(., aes (x = nSpecies, y = mean, color = communityID))+
@@ -170,9 +172,10 @@ RD_combined1%>%
 
 #### plot ####
 str(RD_press1 )
+RD_press1$alpha_info = factor(RD_press1$alpha, levels=c("no\n competition","intermediate\n competition",'strong\n competition'))
 
 press_plot <- RD_press1%>%
-  group_by(nSpecies, RD, alpha_info, communityID) %>%
+  group_by(nSpecies, RD, compNormSd, alpha_info, communityID) %>%
   filter( tOptUpper == 20)%>%
   reframe(mean = mean(NBES),
           sd = sd(NBES),
@@ -182,8 +185,8 @@ press_plot <- RD_press1%>%
  # geom_errorbar(aes(ymin = mean-se, ymax = mean+se))+ 
   geom_point(alpha = 0.5, color = "#0072B2")+
   geom_line(alpha = 0.6, color = "#0072B2")+
-  labs(y = 'Mean NBES', title = 'Tempterature Increase', x = 'Species Richness')+
-  facet_grid(~alpha_info, scales = 'free_y', labeller = label_parsed)+
+  labs(y = 'Mean NBES', title = 'Temperature Increase', x = 'Species Richness')+
+  facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()) + 
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
@@ -199,6 +202,7 @@ press_plot <- RD_press1%>%
         legend.text = element_text(size=14))
 press_plot
 
+RD_flux1$alpha_info = factor(RD_flux1$alpha, levels=c("no\n competition","intermediate\n competition",'strong\n competition'))
 flux_plot <- RD_flux1%>%
   group_by(nSpecies, RD, alpha_info, communityID) %>%
   filter( tOptUpper == 20)%>%
@@ -211,7 +215,7 @@ flux_plot <- RD_flux1%>%
   geom_point(alpha = 0.5, color = "#E41A1C")+
   geom_line(alpha = 0.6, color = "#E41A1C")+
   labs(y = 'Mean NBES', title = 'Temperature Fluctuations', x = 'Species Richness')+
-  facet_grid(~alpha_info, scales = 'free_y', labeller = label_parsed)+
+  facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()) + 
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
@@ -228,6 +232,7 @@ flux_plot <- RD_flux1%>%
 
 flux_plot
 
+RD_combined1$alpha_info = factor(RD_combined1$alpha, levels=c("no\n competition","intermediate\n competition",'strong\n competition'))
 combined_plot <- RD_combined1%>%
   group_by(nSpecies, RD, alpha_info, communityID) %>%
   filter( tOptUpper ==20)%>%
@@ -240,7 +245,7 @@ combined_plot <- RD_combined1%>%
   geom_point(alpha = 0.5, color = '#c7b514')+
   geom_line(alpha = 0.6, color = '#c7b514')+
   labs(y = 'Mean NBES', title = 'Temperature Increase + Fluctuations', x = 'Species Richness')+
-  facet_grid(~alpha_info, scales = 'free_y', labeller = label_parsed)+
+  facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()) + 
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
@@ -271,7 +276,7 @@ press_plot1 <- RD_press1%>%
   geom_point(alpha = 0.6, color = "#0072B2")+
   geom_line(alpha = 0.5, color = "#0072B2")+  
   labs(y = 'Mean NBES', title = 'Same Temperature Optima', x = 'Species Richness')+
-  facet_grid(~alpha_info, scales = 'free_y', labeller = label_parsed)+
+  facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()) + 
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
@@ -299,7 +304,7 @@ press_plot2 <- RD_press1%>%
   geom_point(alpha = 0.6, color = "#0072B2")+
   geom_line(alpha = 0.5, color = "#0072B2")+
   labs(y = 'Mean NBES', title = 'Different Tempterature Optima', x = 'Species Richness')+
-  facet_grid(~alpha_info, scales = 'free_y', labeller = label_parsed)+
+  facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()) + 
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
@@ -392,7 +397,7 @@ GrandMean <- negSlope_press %>%
 
 
 #set colour palette 
-colours<-c("darkblue", "skyblue", '#EFC000FF', 'darkorange')
+colours<-c("darkblue", "skyblue", '#EFC000FF', '#DC4D01')
 custom_labeller <- labeller(
   alpha_info = label_parsed,    # this one gets parsed
   group = label_value      # this one stays plain
@@ -403,7 +408,7 @@ ggplot(GrandMean, aes( y = tOptValue, x = devFromGrandMean, color = nSpecies))  
   labs(x = 'Influence on NBES',  color = 'Richness')+
   scale_color_gradientn(colours = colours)+
   ylab(bquote(b[opt]))+
-  facet_grid(~RD~alpha_info,scales = 'free_y', labeller=custom_labeller)+
+  facet_grid(~RD~alpha_info,scales = 'free_y')+
   theme_bw()+
   theme(legend.position = 'bottom')
 #ggsave(plot=last_plot(), file = here('output/topt_NBESeffect-temp.png'), width = 8, height = 9)
@@ -411,7 +416,7 @@ ggplot(GrandMean, aes( y = tOptValue, x = devFromGrandMean, color = nSpecies))  
   
 #### other distType ####
 negSlope_combined <- RD_combined1%>%  
-  filter(resil.lm <0) %>%
+ # filter(resil.lm <0) %>%
   select(communityID, distType, tOptUpper, compNormSd, alpha_info,RD, resil.lm, combination, NBES, nSpecies)%>%
   group_by(communityID,nSpecies,RD,distType,alpha_info,compNormSd)%>%
   reframe(mean = mean(NBES))%>%
@@ -479,7 +484,7 @@ ggplot(., aes( y = tOptValue, x = devFromGrandMean, color = nSpecies))  +
   labs(x = 'Influence on NBES',  color = 'Richness')+
   scale_color_gradientn(colours = colours)+
   ylab(bquote(b[opt]))+
-  facet_grid(~RD~alpha_info, labeller = custom_labeller, scales = 'free_y')+
+  facet_grid(~RD~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(legend.position = 'bottom')
 #ggsave(plot=last_plot(), file = here('output/topt_NBESeffect-temp_combined.png'), width = 8, height = 8)
@@ -487,7 +492,7 @@ ggplot(., aes( y = tOptValue, x = devFromGrandMean, color = nSpecies))  +
 
 ###
 negSlope_flux <- RD_flux1%>%  
-  filter(resil.lm <0) %>%
+ # filter(resil.lm <0) %>%
   select(communityID, distType, tOptUpper, alpha_info, compNormSd, RD, resil.lm, combination, NBES, nSpecies)%>%
   group_by(communityID,nSpecies,RD,distType,alpha_info, compNormSd)%>%
   reframe(mean = mean(NBES))%>%
@@ -555,13 +560,12 @@ GrandMean_flux%>%
   labs(x = 'Influence on NBES',  color = 'Richness')+
   scale_color_gradientn(colours = colours)+
   ylab(bquote(b[opt]))+
-  facet_grid(~RD~alpha_info, labeller = custom_labeller, scales = 'free_y')+
+  facet_grid(~RD~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(legend.position = 'bottom')
 #ggsave(plot=last_plot(), file = here('output/topt_NBESeffect-temp_flux.png'), width = 8, height = 8)
 
 #### Topt Plot ####
-label_alpha <- c('no interaction', 'intermed interaction' , 'high interaction' ) #compNormSd
 pa <- GrandMean %>%
   filter(RD=="different TOpt" )%>%
   ggplot(., aes( y = tOptValue, x = devFromGrandMean, color = nSpecies))  +
@@ -570,7 +574,7 @@ pa <- GrandMean %>%
   labs(x = 'Influence on NBES',  color = 'Richness', title = 'Increase')+
   scale_color_gradientn(colours = colours)+
   ylab(bquote(b[opt]))+
-  facet_grid(~alpha_info, labeller = label_parsed,scales = 'free_y')+
+  facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(legend.position = 'bottom')+
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
@@ -578,8 +582,6 @@ pa <- GrandMean %>%
   theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
         axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
   theme(strip.text.x  = element_text(size = 12))
-
-ggsave(plot = pa, file = here('output/GrandMean_increase.png'), width = 8, height = 5)
 
 pb<-GrandMean_combined %>%
   filter(RD=="different TOpt" )%>%
@@ -589,7 +591,7 @@ pb<-GrandMean_combined %>%
   labs(x = 'Influence on NBES', color = 'Richness', title = 'Increase + Fluctuation')+
   scale_color_gradientn(colours = colours)+
   ylab(bquote(b[opt]))+
-  facet_grid(~alpha_info, labeller = label_parsed,scales = 'free_y')+
+  facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(legend.position = 'bottom')+
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
@@ -607,7 +609,7 @@ pc<-GrandMean_flux %>%
   labs(x = 'Influence on NBES', color = 'Richness', title = 'Fluctuation')+
   scale_color_gradientn(colours = colours)+
   ylab(bquote(b[opt]))+
-  facet_grid(~alpha_info, labeller = label_parsed,scales = 'free_y')+
+  facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(legend.position = 'bottom')+
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
@@ -626,7 +628,7 @@ ggsave(plot=last_plot(), file = here('output/Figure3_Topt_GrandMean.png'), width
 
 
 #### counts #####
-negSlope_fluct <- RD_flux1%>%  
+negSlope_fluct <- RD_press1%>%  
   filter(resil.lm <0) %>%
   select(communityID, distType, tOptUpper, compNormSd, RD, resil.lm, combination, NBES, nSpecies)%>%
   group_by(communityID,nSpecies,RD,distType,compNormSd)%>%
@@ -638,3 +640,61 @@ negSlope_fluct <- RD_flux1%>%
                 richness_5 = '5')%>%
   filter(richness_5>richness_2)
 
+#### competitiveness - grand mean ####
+pla <- GrandMean %>%
+  filter(RD!="different TOpt" & alpha_info == "strong\n competition")%>%
+  ggplot(., aes( x = meanAlpha, y = devFromGrandMean))  +
+  #geom_vline(xintercept = 0)+
+  geom_point(size = 2, alpha = 0.4)+
+  labs(y = 'Influence on NBES', x="Mean competitiveness", color = 'Richness', title = 'Increase')+
+  scale_color_gradientn(colours = colours)+
+  facet_grid(~nSpecies, scales = 'free_y')+
+  theme_bw()+
+  theme(legend.position = 'bottom')+
+  theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
+        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
+  theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
+        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
+  theme(strip.text.x  = element_text(size = 12))
+pla
+
+plb<-GrandMean_combined %>%
+  filter(RD!="different TOpt" & alpha_info == "strong\n competition")%>%
+  ggplot(., aes( x = meanAlpha, y = devFromGrandMean))  +
+#  geom_vline(xintercept = 0)+
+  geom_point(size = 2, alpha = 0.4)+
+  labs(y = 'Influence on NBES', x="Mean competitiveness", color = 'Richness', title = 'Increase & Fluctuation')+
+  scale_color_gradientn(colours = colours)+
+  facet_grid(~nSpecies, scales = 'free_y')+
+  theme_bw()+
+  theme(legend.position = 'bottom')+
+  theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
+        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
+  theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
+        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
+  theme(strip.text.x  = element_text(size = 12))
+plb
+
+plc<-GrandMean_flux %>%
+  filter(RD!="different TOpt" & alpha_info == "strong\n competition")%>%
+  ggplot(., aes( y = meanAlpha, x = devFromGrandMean))  +
+  #geom_vline(xintercept = 0)+
+  geom_point(size = 2, alpha = 0.4)+
+  labs(y = 'Influence on NBES', x="Mean competitiveness", color = 'Richness', title = 'Fluctuation')+
+  scale_color_gradientn(colours = colours)+
+  facet_grid(~nSpecies, scales = 'free_y')+
+  theme_bw()+
+  theme(legend.position = 'bottom')+
+  theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
+        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
+  theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
+        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
+  theme(strip.text.x  = element_text(size = 12))
+plc
+
+cowplot::plot_grid(pla+theme(legend.position = 'none'),
+                   plc+theme(legend.position = 'none'),
+                   plb+theme(legend.position = 'none'),
+                   labels = c('(a)', '(b)','(c)'),ncol =1)
+
+ggsave("removeme.png", width = 8, height = 8)

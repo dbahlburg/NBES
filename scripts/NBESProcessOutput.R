@@ -9,7 +9,7 @@ library(ggbeeswarm)
 library(here)
 
 # read model run for which NBES should be calculated
-modelResults <- readRDS('output/press_R5.RData')
+modelResults <- readRDS('output/combined_R5.RData')
 modelRuns <- modelResults[[2]]
 
 # loop through model runs and extract runID
@@ -104,7 +104,7 @@ for(i in 1:length(distinctCommunities)){
         left_join(., totalBiomassMixed, by = join_by(time)) %>% 
         ungroup()%>%
         mutate(combination = paste('S',speciesID,collapse = '', sep = ''),
-               relBiomassT0Mixed = unique(mixedRunsMeta$N0)/(unique(mixedRunsMeta$N0) * unique(mixedRunsMeta$nSpecies))) %>% 
+               relBiomassT0Mixed = biomassMixControl/totalBiomMixControl )%>% 
         select(time, combination, species, biomassMixTreatment, biomassMixControl,
                biomassMonoTreatment,biomassMonoControl, biomassMonoRatio, totalBiomMixTreatment, totalBiomMixControl,relBiomassT0Mixed) %>%
         mutate(expSppBiom = totalBiomMixControl*biomassMonoRatio*relBiomassT0Mixed,
@@ -159,31 +159,33 @@ for(i in 1:length(distinctCommunities)){
 }
 
 # save summary file
-write_rds(nbesDatAll, 'output/nbesSummary_press150.RData')
-write_rds(communityMeta, 'output/nbesCommunityMeta_press150.RData')
+write_rds(nbesDatAll, 'output/nbesSummary_combination150_varBV.RData')
+write_rds(communityMeta, 'output/nbesCommunityMeta_combination150_varBV.RData')
 
-nbesDatAll %>% 
-  ggplot(.,aes(x = nSpecies, y = NBES)) +
+dummy <- nbesDatAll %>% 
+  filter(compNormSd == 0 & tOptUpper==20)#
+dummy%>%
+  ggplot(.,aes(x = tOptUpper, y = NBES)) +
   geom_hline(yintercept = 0)+
   geom_quasirandom()
 
 
 ### one exemplary run ###
-write_rds(masterDat, 'output/masterDat_press.RData')
+#write_rds(masterDat, 'output/masterDat_pulse_varBV.RData')
 
  masterDat %>% 
    ggplot(.,aes(x = time, y = totalBiomMixControl)) +
    geom_line(color ='black')+
    geom_line(aes(y = totalBiomMixTreatment), color = 'darkred')+
    labs(y = 'Total Biomass')
- ggsave(plot = last_plot(), file = here('output/TotalBiomass_pressDist.png'))
+# ggsave(plot = last_plot(), file = here('output/TotalBiomass_pressDist.png'))
 
  masterDat %>% 
    ggplot(.,aes(x = time, y = biomassMonoTreatment, color = species)) +
    geom_line()+
    geom_line(aes(y = biomassMonoControl), linetype = 'dashed')+
    labs(y = 'Total Biomass')
- ggsave(plot = last_plot(), file = here('output/sppBiomass_combinedDist.png'))
+# ggsave(plot = last_plot(), file = here('output/sppBiomass_combinedDist.png'))
  
 
 
