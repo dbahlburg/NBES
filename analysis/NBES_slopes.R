@@ -49,7 +49,7 @@ ggplot(slope_press, aes(x = compNormSd, y = resil.lm))+
 
 RD_press1 <- slope_press%>%
   right_join(., nbes_plot_press)%>% 
-  mutate(alpha = paste(ifelse(compNormSd == 0, "no\n competition", ifelse(compNormSd == 0.25, "intermediate\n competition", "strong\n competition"))))
+  mutate(alpha = paste(ifelse(compNormSd == 0, "No\n competition", ifelse(compNormSd == 0.25, "Intermediate\n competition", "Strong\n competition"))))
 
 
 RD_press1%>%
@@ -102,7 +102,7 @@ ggplot(slope_fluct, aes(x = compNormSd, y = resil.lm))+
 
 RD_flux1 <- slope_fluct%>%
   right_join(., nbes_plot_flux)%>% 
-  mutate(alpha = paste(ifelse(compNormSd == 0, "no\n competition", ifelse(compNormSd == 0.25, "intermediate\n competition", "strong\n competition"))))
+  mutate(alpha = paste(ifelse(compNormSd == 0, "No\n competition", ifelse(compNormSd == 0.25, "Intermediate\n competition", "Strong\n competition"))))
 
  
 RD_flux1%>%
@@ -156,7 +156,7 @@ ggplot(slope_combined, aes(x = compNormSd, y = resil.lm))+
 
 RD_combined1 <- slope_combined%>%
   right_join(., nbes_plot_combined) %>% 
-  mutate(alpha = paste(ifelse(compNormSd == 0, "no\n competition", ifelse(compNormSd == 0.25, "intermediate\n competition", "strong\n competition"))))
+  mutate(alpha = paste(ifelse(compNormSd == 0, "No\n competition", ifelse(compNormSd == 0.25, "Intermediate\n competition", "Strong\n competition"))))
 
 RD_combined1%>%
   #filter(resil.lm <0) %>%
@@ -172,7 +172,7 @@ RD_combined1%>%
 
 #### plot ####
 str(RD_press1 )
-RD_press1$alpha_info = factor(RD_press1$alpha, levels=c("no\n competition","intermediate\n competition",'strong\n competition'))
+RD_press1$alpha_info = factor(RD_press1$alpha, levels=c("No\n competition","Intermediate\n competition",'Strong\n competition'))
 
 press_plot <- RD_press1%>%
   group_by(nSpecies, RD, compNormSd, alpha_info, communityID) %>%
@@ -202,7 +202,7 @@ press_plot <- RD_press1%>%
         legend.text = element_text(size=14))
 press_plot
 
-RD_flux1$alpha_info = factor(RD_flux1$alpha, levels=c("no\n competition","intermediate\n competition",'strong\n competition'))
+RD_flux1$alpha_info = factor(RD_flux1$alpha, levels=c("No\n competition","Intermediate\n competition",'Strong\n competition'))
 flux_plot <- RD_flux1%>%
   group_by(nSpecies, RD, alpha_info, communityID) %>%
   filter( tOptUpper == 20)%>%
@@ -232,7 +232,7 @@ flux_plot <- RD_flux1%>%
 
 flux_plot
 
-RD_combined1$alpha_info = factor(RD_combined1$alpha, levels=c("no\n competition","intermediate\n competition",'strong\n competition'))
+RD_combined1$alpha_info = factor(RD_combined1$alpha, levels=c("No\n competition","Intermediate\n competition",'Strong\n competition'))
 combined_plot <- RD_combined1%>%
   group_by(nSpecies, RD, alpha_info, communityID) %>%
   filter( tOptUpper ==20)%>%
@@ -321,7 +321,7 @@ press_plot2 <- RD_press1%>%
 press_plot2
 
 cowplot::plot_grid(press_plot1, press_plot2, labels = c('(a)', '(b)', '(c)'), ncol = 1)
-ggsave(plot = last_plot(), file = here('output/Figure2_MeanNBES_press.pdf'), width = 7, height = 5)
+ggsave(plot = last_plot(), file = here('output/Figure2_MeanNBES_press.tiff'), width = 7, height = 5)
 
 #### Grand Mean ####
 names(RD_press1)
@@ -624,7 +624,7 @@ cowplot::plot_grid(pa+theme(legend.position = 'none'),
                    pc+theme(legend.position = 'none'),
                    pb+theme(legend.position = 'none'),
                    labels = c('(a)', '(b)','(c)'),ncol =1)
-ggsave(plot=last_plot(), file = here('output/Figure3_Topt_GrandMean.png'), width = 7, height = 8)
+ggsave(plot=last_plot(), file = here('output/Figure3_Topt_GrandMean.tiff'), width = 7, height = 8)
 
 
 #### counts #####
