@@ -27,6 +27,7 @@ simMerged %>%
   ggplot(.,aes(x = time, y = biomass, colour = species)) +
   geom_line() +
   labs(x = 'time', y = 'biomass') +
+  scale_color_brewer(palette = "Dark2")+
   facet_grid(compNormSd~distTreatment) +
   theme(strip.background = element_rect(fill = NA, colour = NA),
         panel.background = element_rect(fill = NA, colour = '#2b2b2b'), 

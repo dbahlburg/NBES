@@ -183,7 +183,7 @@ press_plot <- RD_press1%>%
   ggplot(., aes (x = nSpecies, y = mean, group = communityID))+
   geom_hline(yintercept = 0)+
  # geom_errorbar(aes(ymin = mean-se, ymax = mean+se))+ 
-  geom_point(alpha = 0.5, color = "#0072B2")+
+  geom_point(alpha = 0.5, color = "#0072B2", shape = 17)+
   geom_line(alpha = 0.6, color = "#0072B2")+
   labs(y = 'Mean NBES', title = 'Temperature Increase', x = 'Species Richness')+
   facet_grid(~alpha_info, scales = 'free_y')+
@@ -212,7 +212,7 @@ flux_plot <- RD_flux1%>%
   ggplot(., aes (x = nSpecies, y = mean, group = communityID))+
   geom_hline(yintercept = 0)+
   # geom_errorbar(aes(ymin = mean-se, ymax = mean+se))+ 
-  geom_point(alpha = 0.5, color = "#E41A1C")+
+  geom_point(alpha = 0.5, color = "#E41A1C", shape = 19)+
   geom_line(alpha = 0.6, color = "#E41A1C")+
   labs(y = 'Mean NBES', title = 'Temperature Fluctuations', x = 'Species Richness')+
   facet_grid(~alpha_info, scales = 'free_y')+
@@ -242,7 +242,7 @@ combined_plot <- RD_combined1%>%
   ggplot(., aes (x = nSpecies, y = mean, group = communityID))+
   geom_hline(yintercept = 0)+
   # geom_errorbar(aes(ymin = mean-se, ymax = mean+se))+ 
-  geom_point(alpha = 0.5, color = '#c7b514')+
+  geom_point(alpha = 0.5, color = '#c7b514', shape = 15)+
   geom_line(alpha = 0.6, color = '#c7b514')+
   labs(y = 'Mean NBES', title = 'Temperature Increase + Fluctuations', x = 'Species Richness')+
   facet_grid(~alpha_info, scales = 'free_y')+
@@ -262,7 +262,7 @@ combined_plot <- RD_combined1%>%
 combined_plot
 
 cowplot::plot_grid(press_plot, flux_plot, combined_plot, labels = c('(a)', '(b)', '(c)'), ncol = 1)
-ggsave(plot = last_plot(), file = here('output/ExtendedData_FigureS1_MeanNBES_allDist_RD.png'), width = 8, height = 9)
+ggsave(plot = last_plot(), file = here('output/ExtendedData_FigureS1_MeanNBES_allDist_RD.pdf'), width = 8, height = 9)
 
 press_plot1 <- RD_press1%>%
   group_by(nSpecies, RD, alpha_info, communityID) %>%
@@ -303,7 +303,7 @@ press_plot2 <- RD_press1%>%
   # geom_errorbar(aes(ymin = mean-se, ymax = mean+se))+ 
   geom_point(alpha = 0.6, color = "#0072B2")+
   geom_line(alpha = 0.5, color = "#0072B2")+
-  labs(y = 'Mean NBES', title = 'Different Tempterature Optima', x = 'Species Richness')+
+  labs(y = 'Mean NBES', title = 'Different Temperature Optima', x = 'Species Richness')+
   facet_grid(~alpha_info, scales = 'free_y')+
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()) + 
