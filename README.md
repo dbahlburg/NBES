@@ -12,7 +12,7 @@ The file names for reading/writing have to be adjusted accordingly.
 
 
 # Data
-Simulated data used for the analysis are available on Zenodo and need to be stored in output if you wish to replicate the analysis. 
+Simulated data used for the analysis are available on Zenodo https://doi.org/10.5281/zenodo.15274625 and need to be stored in output if you wish to replicate the analysis. 
 
 # Analysis
 Scripts for analysis is stored in the analysis folder, please follow the order of the rscripts starting with the slope calulcations
