@@ -7,4 +7,12 @@ How to run the model:
 4. set parameter/simulation settings in the script (currently set to default values)
 5. run the model at the end of the script
 
-The model output will be stored in the output folder. The script "NBESProcessOutput.R" can be used to process and summarise the simulation results for further analysis. The file names for reading/writing have to be adjusted accordingly.
+The model output will be stored in the output folder. The script "NBESProcessOutput.R" can be used to process and summarise the simulation results for further analysis. 
+The file names for reading/writing have to be adjusted accordingly.
+
+
+# Data
+Simulated data used for the analysis are available on Zenodo and need to be stored in output if you wish to replicate the analysis. 
+
+# Analysis
+Scripts for analysis is stored in the analysis folder, please follow the order of the rscripts starting with the slope calulcations

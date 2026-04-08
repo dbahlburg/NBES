@@ -4,6 +4,7 @@ library(tidyverse)
 library(ggbeeswarm)
 
 #### Load data ####
+# please download data from Zenodo
 nbes_data100 <- readRDS("output/nbesSummary_press150_varBV.RData")
 nbes_data100_flux <- readRDS("output/nbesSummary_fluctuation150_varBV.RData")
 nbes_data100_combined <- readRDS("output/nbesSummary_combination150_varBV.RData")
@@ -280,16 +281,16 @@ press_plot1 <- RD_press1%>%
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()) + 
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
-        axis.text.x = element_text(size = 10,  colour = "black", angle = 0, vjust = 0.5)) +
+        axis.text.x = element_text(size = 11,  colour = "black", angle = 0, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
-        axis.text.y = element_text(size = 10,  colour = "black", angle = 0, hjust = 0.4)) +
+        axis.text.y = element_text(size = 11,  colour = "black", angle = 0, hjust = 0.4)) +
   theme(strip.background =element_rect(),
-        strip.text.x  = element_text(size = 10, face = 'plain'))+
+        strip.text.x  = element_text(size = 12, face = 'plain'))+
   guides(color = guide_legend(override.aes = list(size = 3.5)))+
   theme(legend.position = 'none',
         legend.key.size = unit(2, 'cm'),
-        legend.title = element_text(size=16),
-        legend.text = element_text(size=14))
+        legend.title = element_text(size=12),
+        legend.text = element_text(size=11))
 press_plot1
 
 press_plot2 <- RD_press1%>%
@@ -308,20 +309,20 @@ press_plot2 <- RD_press1%>%
   theme_bw()+
   theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()) + 
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
-        axis.text.x = element_text(size = 10,  colour = "black", angle = 0, vjust = 0.5)) +
+        axis.text.x = element_text(size = 11,  colour = "black", angle = 0, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
-        axis.text.y = element_text(size = 10,  colour = "black", angle = 0, hjust = 0.4)) +
+        axis.text.y = element_text(size = 11,  colour = "black", angle = 0, hjust = 0.4)) +
   theme(strip.background =element_rect(),
-        strip.text.x  = element_text(size = 10, face = 'plain'))+
+        strip.text.x  = element_text(size = 12, face = 'plain'))+
   guides(color = guide_legend(override.aes = list(size = 3.5)))+
   theme(legend.position = 'none',
         legend.key.size = unit(2, 'cm'),
-        legend.title = element_text(size=16),
-        legend.text = element_text(size=14))
+        legend.title = element_text(size=12),
+        legend.text = element_text(size=11))
 press_plot2
 
 cowplot::plot_grid(press_plot1, press_plot2, labels = c('(a)', '(b)', '(c)'), ncol = 1)
-ggsave(plot = last_plot(), file = here('output/Figure2_MeanNBES_press.tiff'), width = 7, height = 5)
+ggsave(plot = last_plot(), file = here('output/Figure2_MeanNBES_press.pdf'), width = 200, height = 150, unit ="mm")
 
 #### Grand Mean ####
 names(RD_press1)
@@ -578,9 +579,9 @@ pa <- GrandMean %>%
   theme_bw()+
   theme(legend.position = 'bottom')+
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
-        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
+        axis.text.x = element_text(size = 11,  colour = "black", angle = 0, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
-        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
+        axis.text.y = element_text(size = 11,  colour = "black", angle = 0, hjust = 0.4)) +
   theme(strip.text.x  = element_text(size = 12))
 
 pb<-GrandMean_combined %>%
@@ -595,9 +596,9 @@ pb<-GrandMean_combined %>%
   theme_bw()+
   theme(legend.position = 'bottom')+
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
-        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
+        axis.text.x = element_text(size = 11,  colour = "black", angle = 0, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
-        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
+        axis.text.y = element_text(size = 11,  colour = "black", angle = 0, hjust = 0.4)) +
   theme(strip.text.x  = element_text(size = 12))
 
 
@@ -613,9 +614,9 @@ pc<-GrandMean_flux %>%
   theme_bw()+
   theme(legend.position = 'bottom')+
   theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
-        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
+        axis.text.x = element_text(size = 11,  colour = "black", angle = 0, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
-        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
+        axis.text.y = element_text(size = 11,  colour = "black", angle = 0, hjust = 0.4)) +
   theme(strip.text.x  = element_text(size = 12))
 
 
@@ -623,8 +624,9 @@ legend <- cowplot::get_legend(pa)
 cowplot::plot_grid(pa+theme(legend.position = 'none'),
                    pc+theme(legend.position = 'none'),
                    pb+theme(legend.position = 'none'),
+                   legend,
                    labels = c('(a)', '(b)','(c)'),ncol =1)
-ggsave(plot=last_plot(), file = here('output/Figure3_Topt_GrandMean.tiff'), width = 7, height = 8)
+ggsave(plot=last_plot(), file = here('output/Figure3_legend.pdf'), width = 8, height = 8)
 
 
 #### counts #####
@@ -640,61 +642,3 @@ negSlope_fluct <- RD_press1%>%
                 richness_5 = '5')%>%
   filter(richness_5>richness_2)
 
-#### competitiveness - grand mean ####
-pla <- GrandMean %>%
-  filter(RD!="different TOpt" & alpha_info == "strong\n competition")%>%
-  ggplot(., aes( x = meanAlpha, y = devFromGrandMean))  +
-  #geom_vline(xintercept = 0)+
-  geom_point(size = 2, alpha = 0.4)+
-  labs(y = 'Influence on NBES', x="Mean competitiveness", color = 'Richness', title = 'Increase')+
-  scale_color_gradientn(colours = colours)+
-  facet_grid(~nSpecies, scales = 'free_y')+
-  theme_bw()+
-  theme(legend.position = 'bottom')+
-  theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
-        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
-  theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
-        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
-  theme(strip.text.x  = element_text(size = 12))
-pla
-
-plb<-GrandMean_combined %>%
-  filter(RD!="different TOpt" & alpha_info == "strong\n competition")%>%
-  ggplot(., aes( x = meanAlpha, y = devFromGrandMean))  +
-#  geom_vline(xintercept = 0)+
-  geom_point(size = 2, alpha = 0.4)+
-  labs(y = 'Influence on NBES', x="Mean competitiveness", color = 'Richness', title = 'Increase & Fluctuation')+
-  scale_color_gradientn(colours = colours)+
-  facet_grid(~nSpecies, scales = 'free_y')+
-  theme_bw()+
-  theme(legend.position = 'bottom')+
-  theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
-        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
-  theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
-        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
-  theme(strip.text.x  = element_text(size = 12))
-plb
-
-plc<-GrandMean_flux %>%
-  filter(RD!="different TOpt" & alpha_info == "strong\n competition")%>%
-  ggplot(., aes( y = meanAlpha, x = devFromGrandMean))  +
-  #geom_vline(xintercept = 0)+
-  geom_point(size = 2, alpha = 0.4)+
-  labs(y = 'Influence on NBES', x="Mean competitiveness", color = 'Richness', title = 'Fluctuation')+
-  scale_color_gradientn(colours = colours)+
-  facet_grid(~nSpecies, scales = 'free_y')+
-  theme_bw()+
-  theme(legend.position = 'bottom')+
-  theme(axis.title.x = element_text(size = 14,face = "plain", colour = "black", vjust = 0),
-        axis.text.x = element_text(size = 12,  colour = "black", angle = 0, vjust = 0.5)) +
-  theme(axis.title.y = element_text(size = 14, face = "plain", colour = "black", vjust = 1.8),
-        axis.text.y = element_text(size = 12,  colour = "black", angle = 0, hjust = 0.4)) +
-  theme(strip.text.x  = element_text(size = 12))
-plc
-
-cowplot::plot_grid(pla+theme(legend.position = 'none'),
-                   plc+theme(legend.position = 'none'),
-                   plb+theme(legend.position = 'none'),
-                   labels = c('(a)', '(b)','(c)'),ncol =1)
-
-ggsave("removeme.png", width = 8, height = 8)
